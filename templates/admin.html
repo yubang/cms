@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>管理面板</title>
+        {% include 'public_css.html' %}
+    </head>
+    <body>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            信息列表
+        </div>
+        <div class="panel-body">
+            <ul class="list-group">
+            {% for obj in lists %}
+                <li class="list-group-item list-group-item-success">
+                <div style="float:left;width:80%;">
+                {{ obj.title }}
+                </div>
+                <div  style="float:right;width:20%;text-align:center;">
+                    <a href="/deleteMessage?id={{ obj.id }}">删除</a>
+                </div>
+                <br><br>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <br><br><br>
+    <div class="panel panel-success">
+        <div class="panel-heading">
+            添加信息
+        </div>
+        <div class="panel-body">
+            <form action="addMessage" method="post">
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">标题：</span>
+                <input type="text" name="title" class="form-control" placeholder="请输入信息标题" required>
+            </div>
+            <br>
+            <div class="input-group input-group-lg">
+                <span class="input-group-addon">状态：</span>
+                <select name="status" class="form-control">
+                    <option>启用</option>
+                    <option>禁用</option>
+                </select>
+            </div>
+            <br>
+            <p align="center">
+                    <input type="submit" class="form-control">
+            </p>
+            </form>
+        </div>
+    </div>
+
+    {% include 'public_js.html' %}
+    </body>
+</html>

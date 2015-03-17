@@ -1,0 +1,8 @@
+create table if not exists cms_message(
+    id int(11) auto_increment,
+    title varchar(200) not null,
+    status tinyint(1) not null,
+    updateTime timestamp,
+    primary key(id),
+    key(title)
+);
