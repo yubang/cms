@@ -1,8 +1,8 @@
 #coding:UTF-8
 
-from flask import Flask,render_template,redirect,request,session
+from flask import Flask,render_template,redirect,request,session,abort
 from lightWeightORM import Db
-import time
+import time,hashlib
 
 app=Flask(__name__)
 app.secret_key="root"
@@ -46,7 +46,7 @@ def admin():
     "后台面板"
     global db
     dao=db.M("cms_message")
-    lists=dao.where().order_by("id").select()
+    lists=dao.where().order_by("-id").select()
     return render_template("admin.html",lists=lists)
 
 @app.route("/addMessage",methods=['POST'])
@@ -55,9 +55,11 @@ def addMessage():
     global db
     title=request.form.get("title",None)
     status=request.form.get('status',None)
+    token=hashlib.md5(str(time.time())).hexdigest()
     
     dao=db.M("cms_message")
-    dao.add({"title":title,"status":status})
+    id=dao.add({"title":title,"status":status,"token":token})
+    dao.where({"id":id}).update({"code":hashlib.md5(str(id)).hexdigest()})
     return redirect("/admin")
 
 @app.route("/deleteMessage")
@@ -71,10 +73,64 @@ def deleteMessage():
     dao.where({"id":id}).delete()
     return redirect("/admin")
 
+
 @app.route("/message")
 def message():
     "信息展示"
-    return render_template("message.html")
+    global db
+    
+    token=request.args.get("token",None)
+    code=request.args.get("code",None)
+    
+    dao=db.M("cms_message")
+    objs=dao.where({"token":token,'code':code}).select()
+    if(len(objs)==1):
+        obj=objs[0]
+    else:
+        return abort(404)
+    
+    dao=db.M("cms_message_content")
+    lists=dao.where({"mid":obj['id']}).select()
+    
+    return render_template("message.html",obj=obj,lists=lists)
+
+
+@app.route("/editMessage")
+def editMessage():
+    "编辑信息"
+    global db
+    
+    id=request.args.get("id",None)
+    
+    dao=db.M("cms_message_content")
+    lists=dao.where({"mid":id}).order_by("id").select()
+    
+    return render_template("editMessage.html",lists=lists,id=id)
+
+@app.route("/addMessageContent",methods=['POST'])
+def addMessageContent():
+    "添加信息子页面"
+    mid=request.form.get("id",None)
+    content=request.form.get("content",None)
+    
+    global db
+    dao=db.M("cms_message_content")
+    dao.add({'mid':mid,'content':content})
+    
+    return redirect("/editMessage?id="+mid)
+
+@app.route("/deleteMessageContent")
+def deleteMessageContent():
+    "删除子页面"
+    id=request.args.get("id",None)
+    mid=request.args.get("mid",None)
+    
+    global db
+    dao=db.M("cms_message_content")
+    dao.where({"id":id,"mid":mid}).delete()
+    
+    return redirect("/editMessage?id="+mid)
+    
     
 if __name__ == "__main__":
     app.run(debug=True,port=8000,host="127.0.0.1")

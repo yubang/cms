@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>编辑器</title>
+        {% include 'public_css.html' %}
+    </head>
+    <body>
+    
+    {% for obj in lists %}
+    <div class="panel panel-warning">
+        <div class="panel-heading">
+        <a href="/deleteMessageContent?id={{ obj.id }}&mid={{ obj.mid }}">删除</a>
+        </div>
+        <div class="panel-body">
+        {{ obj.content }}
+        </div>
+    </div>
+    {% endfor %}
+    
+    <hr>
+    <div class="panel panel-info">
+        <div class="panel-heading">
+        编辑器（请在下面填写代码）
+        </div>
+        <div class="panel-body">
+            <form action="/addMessageContent" method="post">
+            <input type="hidden" name="id" value="{{ id }}">
+            <textArea name="content"  style="width:100%;height:500px;"></textArea>
+            <br>
+            <p align="center">
+                <input type="submit" class="btn btn-default">
+            </p>
+            </form>
+        </div>
+    </div>
+    
+    {% include 'public_js.html' %}
+    </body>
+</html>

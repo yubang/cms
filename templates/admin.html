@@ -18,6 +18,8 @@
                 {{ obj.title }}
                 </div>
                 <div  style="float:right;width:20%;text-align:center;">
+                <a href="/editMessage?id={{ obj.id }}"  target="_blank">编辑</a>
+                <a href="/message?code={{ obj.code }}&token={{ obj.token }}" target="_blank">预览</a>
                     <a href="/deleteMessage?id={{ obj.id }}">删除</a>
                 </div>
                 <br><br>

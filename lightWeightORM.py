@@ -247,7 +247,7 @@ class Table():
     def __dealField(self,data,sign):
         "处理字段，防止sql注入"
         if(data==None):
-            return 'None'
+            return 'null'
         if(type(data)!=str and type(data).__name__!="unicode"):
             data=str(data)
         data=re.sub(r'\'','\\\'',data)
@@ -379,6 +379,7 @@ class Table():
                     result.append(temp[0])
             elif(type==5):
                 result=nums
+                result=cur.lastrowid
             elif(type==6):
                 result=cur.fetchall()
             elif(type==7):
@@ -388,10 +389,14 @@ class Table():
             if(commitSign and not self.__rollbackSign):
                 self.__log.log(u'事务提交',0)
                 self.__con.commit()
+            
+            #主动断开连接
+            
                 
         except Exception,e:
             self.__errorMessage=str(e)
             result=None
+            
         return result
     def __changeColumnsToStr(self):
         "字段转换成字符串"

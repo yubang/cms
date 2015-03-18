@@ -2,7 +2,18 @@ create table if not exists cms_message(
     id int(11) auto_increment,
     title varchar(200) not null,
     status tinyint(1) not null,
+    token varchar(32),
+    code varchar(32),
     updateTime timestamp,
     primary key(id),
-    key(title)
+    key(title),
+    key(code,token)
+);
+
+create table if not exists cms_message_content(
+    id int(11) auto_increment,
+    mid int(11) not null,
+    content text not null,
+    updateTime timestamp,
+    primary key(id)
 );
