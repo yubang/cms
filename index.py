@@ -83,7 +83,7 @@ def message():
     code=request.args.get("code",None)
     
     dao=db.M("cms_message")
-    objs=dao.where({"token":token,'code':code}).select()
+    objs=dao.where({"token":token,'code':code,'status':'0'}).select()
     if(len(objs)==1):
         obj=objs[0]
     else:
@@ -106,6 +106,7 @@ def editMessage():
     lists=dao.where({"mid":id}).order_by("id").select()
     
     return render_template("editMessage.html",lists=lists,id=id)
+
 
 @app.route("/addMessageContent",methods=['POST'])
 def addMessageContent():
@@ -155,6 +156,18 @@ def editMessageContent():
 def exit():
     session.pop("uid")
     return redirect("/")
+
+@app.route("/updateStatus")
+def updateStatus():
+    "修改状态"
+    global db
+    dao=db.M("cms_message")
+    
+    id=request.args.get("id",None)
+    status=request.args.get("status",None)
+    dao.where({"id":id}).update({"status":status})
+    return redirect("/admin")
+    
     
 if __name__ == "__main__":
-    app.run(debug=True,port=8000,host="172.16.45.76")
+    app.run(debug=True,port=8000,host="127.0.0.1")
