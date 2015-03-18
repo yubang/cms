@@ -1,7 +1,9 @@
 #coding:UTF-8
 
 from flask import Flask,render_template,redirect,request,session,abort
+from functools import wraps
 from lightWeightORM import Db
+
 import time,hashlib
 
 app=Flask(__name__)
@@ -15,6 +17,15 @@ dbInfo={
         'password':'root',
     }
 db=Db(dbInfo)
+
+def checkLogin(fn):
+    "检测是否登录"
+    @wraps(fn)
+    def deal(*args, **kwargs):
+        if(not session.has_key("uid")):
+            return redirect("/")
+        return fn(*args, **kwargs)
+    return deal
 
 @app.route("/")
 def index():
@@ -41,7 +52,9 @@ def login():
     else:
         return redirect("/?error=1")
 
-@app.route("/admin")    
+
+@app.route("/admin")
+@checkLogin
 def admin():
     "后台面板"
     global db
@@ -50,6 +63,7 @@ def admin():
     return render_template("admin.html",lists=lists)
 
 @app.route("/addMessage",methods=['POST'])
+@checkLogin
 def addMessage():
     "添加信息"
     global db
@@ -63,6 +77,7 @@ def addMessage():
     return redirect("/admin")
 
 @app.route("/deleteMessage")
+@checkLogin
 def deleteMessage():
     "删除信息"
     global db
@@ -96,6 +111,7 @@ def message():
 
 
 @app.route("/editMessage")
+@checkLogin
 def editMessage():
     "编辑信息"
     global db
@@ -109,6 +125,7 @@ def editMessage():
 
 
 @app.route("/addMessageContent",methods=['POST'])
+@checkLogin
 def addMessageContent():
     "添加信息子页面"
     mid=request.form.get("id",None)
@@ -121,6 +138,7 @@ def addMessageContent():
     return redirect("/editMessage?id="+mid)
 
 @app.route("/deleteMessageContent")
+@checkLogin
 def deleteMessageContent():
     "删除子页面"
     id=request.args.get("id",None)
@@ -134,6 +152,7 @@ def deleteMessageContent():
     
 
 @app.route("/editMessageContent",methods=['GET','POST'])
+@checkLogin
 def editMessageContent():
     "子页面编辑"
     global db
@@ -153,11 +172,16 @@ def editMessageContent():
         return redirect("/editMessage?id="+mid)
     
 @app.route("/exit")
+@checkLogin
 def exit():
-    session.pop("uid")
+    try:
+        session.pop("uid")
+    except:
+        pass
     return redirect("/")
 
 @app.route("/updateStatus")
+@checkLogin
 def updateStatus():
     "修改状态"
     global db
