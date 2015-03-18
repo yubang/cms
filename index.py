@@ -131,6 +131,30 @@ def deleteMessageContent():
     
     return redirect("/editMessage?id="+mid)
     
+
+@app.route("/editMessageContent",methods=['GET','POST'])
+def editMessageContent():
+    "子页面编辑"
+    global db
+    dao=db.M("cms_message_content")
+    
+    id=request.args.get("id",None)
+    mid=request.args.get("mid",None)
+    
+    if(request.method=="GET"):
+        objs=dao.where({"id":id,"mid":mid}).select()
+        if(len(objs)!=1):
+            return abort(404)
+        return render_template("editMessageContent.html",obj=objs[0])
+    else:
+        content=request.form.get("content",None)
+        dao.where({"id":id,"mid":mid}).update({"content":content})
+        return redirect("/editMessage?id="+mid)
+    
+@app.route("/exit")
+def exit():
+    session.pop("uid")
+    return redirect("/")
     
 if __name__ == "__main__":
-    app.run(debug=True,port=8000,host="127.0.0.1")
+    app.run(debug=True,port=8000,host="172.16.45.76")

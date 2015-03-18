@@ -1,5 +1,9 @@
 var bottom = 20,opacity = 100;
-setInterval(dealPic, 100);
+setInterval(dealPic, 130);
+
+//处理图片偏移宽度
+var width=document.body.clientWidth/2-30;
+document.getElementById("up-slide").style.left=width+"px";
 
 var swiper = new Swiper('.swiper-container', {
     pagination: '.swiper-pagination',
