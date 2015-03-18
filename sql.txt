@@ -17,3 +17,12 @@ create table if not exists cms_message_content(
     updateTime timestamp,
     primary key(id)
 );
+
+create table if not exists cms_account(
+    id int(11) auto_increment,
+    username varchar(30),
+    password varchar(32),
+    createTime timestamp,
+    primary key(id)
+);
+insert into cms_account(username,password) values('root','root');

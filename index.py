@@ -46,7 +46,12 @@ def login():
     "登录"
     username=request.form.get("username",None)
     password=request.form.get("password",None)
-    if(username=="root" and password=="root"):
+    
+    global db
+    dao=db.M("cms_account")
+    result=dao.where({"username":username,"password":password}).count()
+    
+    if(result==1):
         session['uid']=time.time()
         return redirect("/admin")
     else:
