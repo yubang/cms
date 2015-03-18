@@ -23,12 +23,13 @@
     <hr>
     <div class="panel panel-info">
         <div class="panel-heading">
-        编辑器（请在下面填写代码）
+        编辑器（请在下面填写代码,右边是实时窗口）
         </div>
         <div class="panel-body">
             <form action="/addMessageContent" method="post">
             <input type="hidden" name="id" value="{{ id }}">
-            <textArea name="content"  style="width:100%;height:500px;"></textArea>
+            <textArea name="content"  style="width:50%;height:500px;font-size:20px;" id="content"></textArea>
+            <div id="showCodeDiv" style="width:48%;float:right;height:500px;border:1px solid skyblue;"></div>
             <br>
             <p align="center">
                 <input type="submit" class="btn btn-default">
@@ -38,5 +39,6 @@
     </div>
     
     {% include 'public_js.html' %}
+    <script src="/static/edit.js"></script>
     </body>
 </html>
