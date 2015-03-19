@@ -1,10 +1,10 @@
 #coding:UTF-8
 
-from flask import Flask,render_template,redirect,request,session,abort
+from flask import Flask,render_template,redirect,request,session,abort,send_from_directory
 from functools import wraps
 from lightWeightORM import Db
 
-import time,hashlib
+import time,hashlib,qrcode,StringIO
 
 app=Flask(__name__)
 app.secret_key="root"
@@ -17,6 +17,8 @@ dbInfo={
         'password':'root',
     }
 db=Db(dbInfo)
+
+rootPath="http://127.0.0.1"
 
 def checkLogin(fn):
     "检测是否登录"
@@ -196,7 +198,27 @@ def updateStatus():
     status=request.args.get("status",None)
     dao.where({"id":id}).update({"status":status})
     return redirect("/admin")
-    
+
+@app.route("/buildCode")
+def buildCode():
+    "生成二维码"
+    global rootPath
+    code=request.args.get("code",None)
+    token=request.args.get("token",None)
+    qr = qrcode.QRCode(
+        version=2,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=1
+    )
+    qr.add_data("%s/message?code=%s&token=%s"%(rootPath,code,token))
+    qr.make(fit=True)
+    img = qr.make_image()
+    buf = StringIO.StringIO()
+    img.save(buf,'png')
+    response=app.make_response(buf.getvalue())
+    response.headers['Content-Type'] = 'image/png'
+    return response
     
 if __name__ == "__main__":
     app.run(debug=True,port=8000,host="127.0.0.1")

@@ -37,7 +37,8 @@
                 <a href="/updateStatus?id={{ obj.id }}&status=1">禁用</a>
                 {% endif %}
                 <a href="/message?code={{ obj.code }}&token={{ obj.token }}" target="_blank">预览</a>
-                    <a href="/deleteMessage?id={{ obj.id }}">删除</a>
+                <a href="/buildCode?code={{ obj.code }}&token={{ obj.token }}" target="_blank">二维码</a>
+                <a href="/deleteMessage?id={{ obj.id }}">删除</a>
                 </div>
                 <br><br>
                 </li>
