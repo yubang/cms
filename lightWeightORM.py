@@ -109,6 +109,7 @@ class Db():
     @param cacheTimeout 缓存时间
     """
     def __init__(self,dbInfo,dbType="mysql",showSql=True,cacheObj=None,cachePrefix="lightWeight_",cacheTimeout=3600*24,charset="utf8"):
+        self.__con=None
         self.dbInfo=dbInfo
         self.showSql=showSql
         self.cache=Cache()
@@ -122,8 +123,9 @@ class Db():
                 self.log=Log(0)
         else:
             self.log=cacheObj
-        self.__connectionDb()
+        #self.__connectionDb()
     def __del__(self):
+        #self.__con.close()
         self.log.log("db connection close!",0)
     def __connectionDb(self):
         "尝试连接数据库，5次重试"
@@ -139,12 +141,17 @@ class Db():
             index=index+1
             time.sleep(0.2)
         return False
+    def __getConnectionDb(self):
+        "获取连接"
+        con=self.__con=MySQLdb.connect(host=self.dbInfo['host'],port=self.dbInfo['port'],user=self.dbInfo['user'],passwd=self.dbInfo['password'],db=self.dbInfo['dbName'],use_unicode=0, charset=self.__charset)
+        return con
+        
     """
     @param tableName 数据表名
     """
     def M(self,tableName):
         "获取一个数据表封装类"
-        return Table(tableName,self.__con,self.showSql,self.cache,self.log,self.__connectionDb,self.__cacheTimeout,self.__cachePrefix,self.__charset)
+        return Table(tableName,self.__con,self.showSql,self.cache,self.log,self.__getConnectionDb,self.__cacheTimeout,self.__cachePrefix,self.__charset)
     """
     @param timeout int缓存过期时间
     """
@@ -340,6 +347,7 @@ class Table():
     """
     def __buildData(self,type,commitSign):
         
+        '''
         #防止数据库连接断开
         try:
             self.__con.ping()
@@ -348,6 +356,10 @@ class Table():
             if(self.__connectionDb()==False):
                 self.__errorMessage=str(e)
                 return None
+        '''
+        
+        #获取连接
+        self.__con=self.__connectionDb()
         
         try:
             self.__showSql()
@@ -386,16 +398,20 @@ class Table():
                 results=cur.fetchone()
                 result=results[0]
             
+            
             if(commitSign and not self.__rollbackSign):
                 self.__log.log(u'事务提交',0)
                 self.__con.commit()
-            
-            #主动断开连接
-            
+                self.__con.close()
+            elif(not self.__rollbackSign):
+                self.__cursor=None
+                self.__con.close()
                 
         except Exception,e:
             self.__errorMessage=str(e)
             result=None
+            raise
+            return []
             
         return result
     def __changeColumnsToStr(self):
@@ -415,19 +431,11 @@ class Table():
     """
     def __useCacheInSelect(self,type):
         "缓存查询数据"
-        #尝试从缓存获取信息
-        cacheKey=self.__cachePrefix+"select_"+hashlib.md5(self.__sql).hexdigest()
-        text=self.__cache.get(cacheKey)
-        if(text!=None):
-            self.__log.log(u"从缓存获取到查询数据",0)
-            self.__again()#删除作废信息
-            return json.loads(text)
+        #由于缓存在分布式时会产生问题，因此禁用缓存
+        
         result=self.__buildData(type,False)
-        if(result!=None):
-            #写入缓存
-            self.__cache.set(cacheKey,json.dumps(result),self.__cacheTimeout)
-            self.__loginCacheKey(cacheKey)
         self.__again()#删除作废信息
+        
         return result
     """
     @param text 要查询的字段（str）
