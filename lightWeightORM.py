@@ -316,7 +316,7 @@ class Table():
         for key in keys:
             self.__columns.append(key)
             if(index!=0):
-                text=text+" AND "
+                text=text+" , "
             text=text+self.__dealField(key,False)+"="+self.__dealField(data[key],True)
             index=index+1
         self.__sql="UPDATE %s SET %s "%(self.__tableName,text)
@@ -398,20 +398,19 @@ class Table():
                 results=cur.fetchone()
                 result=results[0]
             
+            #把游标置为None，防止重复使用
+            self.__cursor=None
             
             if(commitSign and not self.__rollbackSign):
                 self.__log.log(u'事务提交',0)
                 self.__con.commit()
                 self.__con.close()
             elif(not self.__rollbackSign):
-                self.__cursor=None
                 self.__con.close()
                 
         except Exception,e:
             self.__errorMessage=str(e)
             result=None
-            raise
-            return []
             
         return result
     def __changeColumnsToStr(self):
